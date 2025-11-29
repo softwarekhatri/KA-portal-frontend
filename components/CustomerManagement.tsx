@@ -4,6 +4,7 @@ import { Customer } from "../types";
 import CustomerFormModal from "./CustomerFormModal";
 import { PlusIcon, SearchIcon, EditIcon, TrashIcon } from "./icons/Icons";
 import { backendInstance } from "@/utils/constant";
+import { useDebounce } from "@/hooks/useDebounce";
 
 const CustomerManagement: React.FC = () => {
   const [customerData, setCustomerData] = useState<Customer[]>([]);
@@ -18,17 +19,21 @@ const CustomerManagement: React.FC = () => {
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
 
+  const debouncedSearchTerm = useDebounce(searchTerm);
+
   useEffect(() => {
     setLoading(true);
     backendInstance
-      .get(`/customers?page=${page}&limit=${limit}`)
+      .get(
+        `/customers?page=${page}&limit=${limit}&query=${debouncedSearchTerm}`
+      )
       .then((response) => {
         setCustomerData(response.data.data);
         setTotalPages(response.data.totalPages);
         setTotal(response.data.total);
       })
       .finally(() => setLoading(false));
-  }, [page, limit, searchTerm]);
+  }, [page, limit, debouncedSearchTerm]);
 
   const deleteCustomer = (customerId: string) => {
     if (window.confirm("Are you sure you want to delete this customer?")) {
@@ -80,7 +85,7 @@ const CustomerManagement: React.FC = () => {
 
       <div className="bg-white shadow-md rounded-lg overflow-x-auto">
         {loading ? (
-          <div className="text-center p-8">Loading customers...</div>
+          <div className="text-center p-8">Fetching customers...</div>
         ) : (
           <>
             <table className="min-w-full divide-y divide-gray-200 hidden md:table">
