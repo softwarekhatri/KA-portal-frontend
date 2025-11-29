@@ -37,8 +37,10 @@ export interface CustomerResponse {
 }
 
 export interface Customer {
-  _id: string;
+  _id?: string;
   name: string;
   phone: string[];
   address: string;
+  totalBills?: number;
+  totalDues?: number;
 }

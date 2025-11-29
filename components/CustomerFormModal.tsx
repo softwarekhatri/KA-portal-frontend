@@ -1,40 +1,76 @@
 import React, { useState, useEffect } from "react";
 import Modal from "./Modal";
-import { useData } from "../hooks/useData";
 import { Customer } from "../types";
+import { backendInstance } from "@/utils/constant";
 
 interface CustomerFormModalProps {
   isOpen: boolean;
   onClose: () => void;
   customer?: Customer;
+  setCustomerData?: React.Dispatch<React.SetStateAction<Customer[]>>;
 }
 
 const CustomerFormModal: React.FC<CustomerFormModalProps> = ({
   isOpen,
   onClose,
   customer,
+  setCustomerData,
 }) => {
-  const { addCustomer, updateCustomer } = useData();
   const [name, setName] = useState("");
   const [phone, setPhone] = useState<string[]>([]);
   const [address, setAddress] = useState("");
   const [error, setError] = useState("");
 
   useEffect(() => {
-    console.log("here customer phone", customer?.phone);
     if (customer) {
       setName(customer.name);
-      console.log("here customer phone", customer.phone);
-      // setPhone(customer.phone || "");
+      setPhone(customer.phone || []);
       setAddress(customer.address || "");
       setError("");
     } else {
       setName("");
-      setPhone("");
+      setPhone([]);
       setAddress("");
       setError("");
     }
   }, [customer, isOpen]);
+
+  const updateCustomer = (updatedCustomer: Customer) => {
+    backendInstance
+      .patch(`/customers/${updatedCustomer._id}`, updatedCustomer)
+      .then((response) => {
+        console.log("Customer updated successfully:", response.data);
+        setCustomerData((prev) =>
+          prev.map((c) =>
+            c._id === updatedCustomer._id
+              ? {
+                  ...response.data,
+                  totalBills: c.totalBills,
+                  totalDues: c.totalDues,
+                }
+              : c
+          )
+        );
+      })
+      .catch((error) => {
+        console.error("Error updating customer:", error);
+      });
+  };
+
+  const addCustomer = (newCustomer: Customer) => {
+    backendInstance
+      .post("/customers", newCustomer)
+      .then((response) => {
+        console.log("Customer added successfully:", response.data);
+        setCustomerData((prev) => [
+          ...prev,
+          { ...response.data, totalBills: 0, totalDues: 0 },
+        ]);
+      })
+      .catch((error) => {
+        console.error("Error adding customer:", error);
+      });
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -45,7 +81,7 @@ const CustomerFormModal: React.FC<CustomerFormModalProps> = ({
 
     const customerData = {
       name: name.trim(),
-      // phone: phone.trim(),
+      phone: phone,
       address: address.trim(),
     };
 
@@ -90,8 +126,11 @@ const CustomerFormModal: React.FC<CustomerFormModalProps> = ({
           <input
             type="tel"
             id="phone"
-            value={phone}
-            onChange={(e) => setPhone(e.target.value)}
+            value={phone.join(",")}
+            onChange={(e) => {
+              const phones = e.target.value.split(",").map((num) => num.trim());
+              setPhone(phones);
+            }}
             className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-brand-gold focus:border-brand-gold sm:text-sm"
           />
         </div>

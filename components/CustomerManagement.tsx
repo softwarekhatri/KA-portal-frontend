@@ -1,13 +1,10 @@
-import React, { useState, useMemo, useEffect } from "react";
-// import { useData } from "../hooks/useData";
+import React, { useState, useEffect } from "react";
 import { Customer } from "../types";
-import { calculateBillTotals } from "../utils/calculations";
 import CustomerFormModal from "./CustomerFormModal";
 import { PlusIcon, SearchIcon, EditIcon, TrashIcon } from "./icons/Icons";
 import { backendInstance } from "@/utils/constant";
 
 const CustomerManagement: React.FC = () => {
-  // const { customers, bills, deleteCustomer, isLoading } = useData();
   const [customerData, setCustomerData] = useState<Customer[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingCustomer, setEditingCustomer] = useState<Customer | undefined>(
@@ -15,35 +12,19 @@ const CustomerManagement: React.FC = () => {
   );
   const [searchTerm, setSearchTerm] = useState("");
 
-  // const customerData = useMemo(() => {
-  //   // return customers
-  //   //   .map((customer) => {
-  //   //     const customerBills = bills.filter(
-  //   //       (bill) => bill.customerId === customer.id
-  //   //     );
-  //   //     const totalDues = customerBills.reduce(
-  //   //       (acc, bill) => acc + calculateBillTotals(bill).balanceDue,
-  //   //       0
-  //   //     );
-  //   //     return {
-  //   //       ...customer,
-  //   //       billCount: customerBills.length,
-  //   //       totalDues,
-  //   //     };
-  //   //   })
-  //   //   .filter(
-  //   //     (c) =>
-  //   //       c.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-  //   //       c.phone?.includes(searchTerm) ||
-  //   //       c.address?.toLowerCase().includes(searchTerm.toLowerCase())
-  //   //   );
-  // }, [searchTerm]);
-
   useEffect(() => {
     backendInstance.get("/customers").then((response) => {
       setCustomerData(response.data.data);
     });
   }, []);
+
+  const deleteCustomer = (customerId: string) => {
+    if (window.confirm("Are you sure you want to delete this customer?")) {
+      backendInstance.delete(`/customers/${customerId}`).then(() => {
+        setCustomerData((prev) => prev.filter((c) => c._id !== customerId));
+      });
+    }
+  };
 
   const handleAddCustomer = () => {
     setEditingCustomer(undefined);
@@ -134,11 +115,10 @@ const CustomerManagement: React.FC = () => {
                   {customer.phone.join(", ") || "Not Avaialble"}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {/* {customer.billCount} */} Bill Count
+                  {customer.totalBills}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-red-600">
-                  {/* ₹{customer.totalDues.toLocaleString("en-IN")} */} total
-                  Dues
+                  {customer.totalDues}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
                   <button
@@ -148,7 +128,7 @@ const CustomerManagement: React.FC = () => {
                     <EditIcon className="w-5 h-5" />
                   </button>
                   <button
-                    // onClick={() => deleteCustomer(customer._id)}
+                    onClick={() => deleteCustomer(customer._id)}
                     className="text-red-600 hover:text-red-900 p-1"
                   >
                     <TrashIcon className="w-5 h-5" />
@@ -186,7 +166,7 @@ const CustomerManagement: React.FC = () => {
                     <EditIcon className="w-5 h-5" />
                   </button>
                   <button
-                    // onClick={() => deleteCustomer(customer.id)}
+                    onClick={() => deleteCustomer(customer._id)}
                     className="text-red-600 hover:text-red-900 p-1"
                   >
                     <TrashIcon className="w-5 h-5" />
@@ -197,14 +177,13 @@ const CustomerManagement: React.FC = () => {
                 <span className="text-gray-600">
                   Bills:{" "}
                   <span className="font-medium text-brand-dark">
-                    {/* {customer.billCount} */} Bill count
+                    {customer.totalBills}
                   </span>
                 </span>
                 <span className="text-gray-600">
                   Dues:{" "}
                   <span className="font-medium text-red-600">
-                    {/* ₹{customer.totalDues.toLocaleString("en-IN")} */} Total
-                    Dues
+                    {customer.totalDues}
                   </span>
                 </span>
               </div>
@@ -220,6 +199,7 @@ const CustomerManagement: React.FC = () => {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         customer={editingCustomer}
+        setCustomerData={setCustomerData}
       />
     </div>
   );
