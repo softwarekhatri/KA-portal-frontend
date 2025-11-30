@@ -4,28 +4,30 @@ export enum PaymentMode {
 }
 
 export interface BillItem {
-  id: string;
   name: string;
-  weight: number;
-  rate: number; // rate per 10 gram
+  weightInGrams: number;
+  ratePer10g: number; // rate per 10 gram
   makingCharge: number;
-  discount: number;
+  makingChargeType: MakingChargeType;
+  discount?: number;
+  totalPrice: number;
 }
 
 export interface Payment {
-  id: string;
-  amount: number;
-  date: string;
-  mode: PaymentMode;
-  reference?: string;
+  amountPaid: number;
+  paymentMode: PaymentMode;
+  paymentDate: Date;
+  referenceId?: string;
 }
 
 export interface Bill {
-  id: string;
+  _id?: string;
   customerId: string;
-  date: string;
+  billDate: Date;
   items: BillItem[];
   payments: Payment[];
+  totalAmount: number;
+  balanceDues: number;
 }
 
 export interface CustomerResponse {
@@ -43,4 +45,10 @@ export interface Customer {
   address: string;
   totalBills?: number;
   totalDues?: number;
+}
+
+export enum MakingChargeType {
+  FIXED = "FIXED",
+  PER_GRAM = "PER_GRAM",
+  PERCENTAGE = "PERCENTAGE",
 }
