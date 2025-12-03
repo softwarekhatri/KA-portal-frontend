@@ -1,4 +1,5 @@
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useEffect } from "react";
+import { useDebounce } from "../hooks/useDebounce";
 import { useNavigate } from "react-router-dom";
 import {
   PlusIcon,
@@ -13,20 +14,53 @@ import { Bill } from "@/types";
 const Bills: React.FC = () => {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
+  const debouncedSearchTerm = useDebounce(searchTerm);
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [bills, setBills] = useState<Bill[]>([]);
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(10);
+  const [totalPages, setTotalPages] = useState(1);
+
+  const handleDeleteBill = (billId: string) => {
+    if (window.confirm("Are you sure you want to delete this bill?")) {
+      backendInstance.delete(`/bills/${billId}`).then(() => {
+        setBills((prev) => prev.filter((b) => b._id !== billId));
+      });
+    }
+  };
 
   useEffect(() => {
+    // Only call API if both startDate and endDate are selected, or neither is selected
+    const bothDatesSelected = startDate && endDate;
+    const neitherDateSelected = !startDate && !endDate;
+    if (!(bothDatesSelected || neitherDateSelected)) return;
+
+    let filter: any = {
+      page,
+      limit,
+    };
+    if (debouncedSearchTerm) {
+      if (debouncedSearchTerm.startsWith("KA-")) {
+        filter.billId = debouncedSearchTerm;
+      } else {
+        filter.search = debouncedSearchTerm;
+      }
+    }
+    if (bothDatesSelected) {
+      filter.startDate = startDate;
+      filter.endDate = endDate;
+    }
     backendInstance
-      .post("/bills/getBills", {})
+      .post("/bills/getBills", filter)
       .then((response) => {
         setBills(response.data.data);
+        setTotalPages(response.data.totalPages || 1);
       })
       .catch((error) => {
         console.error("Error fetching bills:", error);
       });
-  }, []);
+  }, [debouncedSearchTerm, startDate, endDate, page, limit]);
 
   const handlePrint = (billId: string) => {
     const printUrl = `#/print/bill/${billId}`;
@@ -137,8 +171,27 @@ const Bills: React.FC = () => {
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-mono text-gray-700">
                   {bill._id}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                  {bill.customer?.name || "N/A"}
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  {bill.customer ? (
+                    <div className="flex flex-col gap-1 min-w-[120px]">
+                      <span className="font-semibold text-brand-dark text-base">
+                        {bill.customer.name}
+                      </span>
+                      {bill.customer.phone &&
+                        bill.customer.phone.length > 0 && (
+                          <span className="text-xs text-gray-600 break-all">
+                            {bill.customer.phone.join(", ")}
+                          </span>
+                        )}
+                      {bill.customer.address && (
+                        <span className="text-xs text-gray-500 break-all">
+                          {bill.customer.address}
+                        </span>
+                      )}
+                    </div>
+                  ) : (
+                    <span className="text-gray-400">N/A</span>
+                  )}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                   {new Date(bill.billDate).toLocaleDateString()}
@@ -165,7 +218,7 @@ const Bills: React.FC = () => {
                     <EditIcon className="w-5 h-5" />
                   </button>
                   <button
-                    // onClick={() => deleteBill(bill._id)}
+                    onClick={() => handleDeleteBill(bill._id)}
                     className="text-red-600 hover:text-red-900 p-1"
                   >
                     <TrashIcon className="w-5 h-5" />
@@ -206,7 +259,7 @@ const Bills: React.FC = () => {
                     <EditIcon className="w-5 h-5" />
                   </button>
                   <button
-                    // onClick={() => deleteBill(bill._id)}
+                    onClick={() => handleDeleteBill(bill._id)}
                     className="text-red-600 hover:text-red-900 p-1"
                   >
                     <TrashIcon className="w-5 h-5" />
@@ -233,6 +286,28 @@ const Bills: React.FC = () => {
       </div>
       {bills.length === 0 && (
         <p className="text-center text-gray-500 py-8">No bills found.</p>
+      )}
+      {/* Pagination Controls */}
+      {totalPages > 1 && (
+        <div className="flex justify-center items-center gap-2 py-4">
+          <button
+            className="px-3 py-1 rounded bg-gray-200 text-gray-700 disabled:opacity-50"
+            onClick={() => setPage((p) => Math.max(1, p - 1))}
+            disabled={page === 1}
+          >
+            Prev
+          </button>
+          <span className="px-2">
+            Page {page} of {totalPages}
+          </span>
+          <button
+            className="px-3 py-1 rounded bg-gray-200 text-gray-700 disabled:opacity-50"
+            onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+            disabled={page === totalPages}
+          >
+            Next
+          </button>
+        </div>
       )}
     </div>
   );
