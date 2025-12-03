@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback } from "react";
+import Toast, { ToastType } from "./Toast";
 import { useDebounce } from "../hooks/useDebounce";
 import CustomerFormModal from "./CustomerFormModal";
 import { backendInstance } from "@/utils/constant";
@@ -21,6 +22,10 @@ const BillForm: React.FC = () => {
   const location = useLocation();
   const billData = location.state as Bill | undefined;
 
+  const [toast, setToast] = useState<{
+    message: string;
+    type: ToastType;
+  } | null>(null);
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(
     null
   );
@@ -152,32 +157,43 @@ const BillForm: React.FC = () => {
     return calculateBillTotals({ items, payments } as Bill);
   }, [items, payments]);
 
-  const handleAddBill = (billData: Bill) => {
-    backendInstance
-      .post("/bills", billData)
-      .then((response) => {
-        console.log("Bill added successfully ", response.data);
-      })
-      .catch((error) => {
-        console.error("Error adding bill: ", error);
+  const handleAddBill = async (billData: Bill) => {
+    try {
+      const response = await backendInstance.post("/bills", billData);
+      setToast({ message: "Bill added successfully!", type: "success" });
+      console.log("Bill added successfully ", response.data);
+      setTimeout(() => navigate("/bills"), 1200);
+    } catch (error) {
+      console.error("Error adding bill: ", error);
+      setToast({
+        message: "Error adding bill. Please try again.",
+        type: "error",
       });
+    }
   };
 
-  const handleUpdateBill = (billId: string, billData: Bill) => {
-    backendInstance
-      .patch(`/bills/${billId}`, billData)
-      .then((response) => {
-        console.log("Bill updated successfully ", response.data);
-      })
-      .catch((error) => {
-        console.error("Error updating bill: ", error);
+  const handleUpdateBill = async (billId: string, billData: Bill) => {
+    try {
+      const response = await backendInstance.patch(
+        `/bills/${billId}`,
+        billData
+      );
+      setToast({ message: "Bill updated successfully!", type: "success" });
+      console.log("Bill updated successfully ", response.data);
+      setTimeout(() => navigate("/bills"), 1200);
+    } catch (error) {
+      console.error("Error updating bill: ", error);
+      setToast({
+        message: "Error updating bill. Please try again.",
+        type: "error",
       });
+    }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedCustomer) {
-      alert("Please select a customer.");
+      setToast({ message: "Please select a customer.", type: "error" });
       return;
     }
 
@@ -192,11 +208,10 @@ const BillForm: React.FC = () => {
       balanceDues: balanceDue,
     };
     if (isEditing && billId) {
-      handleUpdateBill(billId, billData);
+      await handleUpdateBill(billId, billData);
     } else {
-      handleAddBill(billData);
+      await handleAddBill(billData);
     }
-    navigate("/bills");
   };
 
   const getItemPrice = useCallback((item: BillItem) => {
@@ -209,6 +224,13 @@ const BillForm: React.FC = () => {
 
   return (
     <>
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(null)}
+        />
+      )}
       <form onSubmit={handleSubmit} className="space-y-8">
         <div className="flex items-center gap-4">
           <button
