@@ -270,7 +270,9 @@ const Bills: React.FC = () => {
                       <PrintIcon className="w-5 h-5" />
                     </button>
                     <button
-                      onClick={() => navigate(`/bills/edit/${bill._id}`)}
+                      onClick={() =>
+                        navigate(`/bills/edit/${bill._id}`, { state: bill })
+                      }
                       className="text-brand-gold hover:text-yellow-700 p-1"
                     >
                       <EditIcon className="w-5 h-5" />
