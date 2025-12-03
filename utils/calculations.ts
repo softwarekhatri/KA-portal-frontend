@@ -1,4 +1,4 @@
-import { Bill, BillItem, Payment } from "../types";
+import { Bill } from "../types";
 
 export const calculateBillTotals = (bill: Pick<Bill, "items" | "payments">) => {
   const totalAmount = bill.items.reduce((acc, item) => {

@@ -1,6 +1,16 @@
+// API response for bills
+export interface BillApiResponse {
+  data: Bill[];
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+}
+
 export enum PaymentMode {
   CASH = "CASH",
   ONLINE = "ONLINE",
+  DISCOUNT = "DISCOUNT",
 }
 
 export interface BillItem {
@@ -28,6 +38,9 @@ export interface Bill {
   payments: Payment[];
   totalAmount: number;
   balanceDues: number;
+  createdAt?: string;
+  updatedAt?: string;
+  customer?: Customer;
 }
 
 export interface CustomerResponse {

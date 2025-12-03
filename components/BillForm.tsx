@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { useDebounce } from "../hooks/useDebounce";
 import CustomerFormModal from "./CustomerFormModal";
 import { backendInstance } from "@/utils/constant";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import {
   Customer,
   Bill,
@@ -17,6 +17,9 @@ import { PlusIcon, TrashIcon, ChevronLeftIcon, XIcon } from "./icons/Icons";
 const BillForm: React.FC = () => {
   const { billId } = useParams();
   const navigate = useNavigate();
+
+  const location = useLocation();
+  const billData = location.state as Bill | undefined;
 
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(
     null
@@ -36,6 +39,15 @@ const BillForm: React.FC = () => {
 
   // Debounced search term
   const debouncedSearchTerm = useDebounce(customerSearch);
+
+  useEffect(() => {
+    if (billData) {
+      setSelectedCustomer(billData?.customer || null);
+      setBillDate(new Date(billData.billDate).toISOString().split("T")[0]);
+      setItems(billData.items);
+      setPayments(billData.payments);
+    }
+  }, []);
 
   // Fetch customers from API with pagination and search
   useEffect(() => {
@@ -74,23 +86,6 @@ const BillForm: React.FC = () => {
     setIsCustomerModalOpen(false);
     setCustomerSearch("");
   };
-
-  // useEffect(() => {
-  //   if (isEditing && getBillById) {
-  //     const bill = getBillById(billId);
-  //     if (bill) {
-  //       const customer = searchDatalist.find((c) => c._id === bill.customerId);
-  //       setSelectedCustomer(customer || null);
-  //       if (customer) setCustomerSearch(customer.name);
-  //       setBillDate(bill.date);
-  //       setItems(bill.items);
-  //       setPayments(bill.payments);
-  //     }
-  //   } else {
-  //     // New bill defaults
-  //     addItem();
-  //   }
-  // }, [billId, getBillById, isEditing]);
 
   // Items management
   const addItem = () => {
@@ -168,6 +163,17 @@ const BillForm: React.FC = () => {
       });
   };
 
+  const handleUpdateBill = (billId: string, billData: Bill) => {
+    backendInstance
+      .patch(`/bills/${billId}`, billData)
+      .then((response) => {
+        console.log("Bill updated successfully ", response.data);
+      })
+      .catch((error) => {
+        console.error("Error updating bill: ", error);
+      });
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedCustomer) {
@@ -186,9 +192,8 @@ const BillForm: React.FC = () => {
       balanceDues: balanceDue,
     };
     if (isEditing && billId) {
-      // updateBill({ id: billId, ...billData });
+      handleUpdateBill(billId, billData);
     } else {
-      // addBill(billData);
       handleAddBill(billData);
     }
     navigate("/bills");
@@ -435,10 +440,11 @@ const BillForm: React.FC = () => {
                 >
                   <option value={PaymentMode.CASH}>CASH</option>
                   <option value={PaymentMode.ONLINE}>ONLINE</option>
+                  <option value={PaymentMode.DISCOUNT}>DISCOUNT</option>
                 </select>
                 <input
                   type="text"
-                  placeholder="Reference No."
+                  placeholder="Reference Id."
                   value={payment.referenceId || ""}
                   disabled={payment.paymentMode === PaymentMode.CASH}
                   onChange={(e) =>
