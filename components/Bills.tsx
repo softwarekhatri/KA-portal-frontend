@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useDebounce } from "../hooks/useDebounce";
 import { useNavigate } from "react-router-dom";
+import ReactDOM from "react-dom/client";
 import {
   PlusIcon,
   SearchIcon,
@@ -11,6 +12,7 @@ import {
 import { backendInstance } from "@/utils/constant";
 import { Bill } from "@/types";
 import Toast, { ToastType } from "./Toast";
+import { BillPdf } from "./billPdf";
 
 const Bills: React.FC = () => {
   const navigate = useNavigate();
@@ -68,9 +70,16 @@ const Bills: React.FC = () => {
       });
   }, [debouncedSearchTerm, startDate, endDate, page, limit]);
 
-  const handlePrint = (billId: string) => {
-    const printUrl = `#/print/bill/${billId}`;
-    window.open(printUrl, "_blank");
+  const handlePrint = (bill: Bill) => {
+    const printWindow = window.open("", "_blank", "width=1000,height=800");
+    const div = printWindow.document.createElement("div");
+    printWindow.document.body.appendChild(div);
+    const root = ReactDOM.createRoot(div);
+    root.render(<BillPdf bill={bill} />);
+    // Optional — auto print after rendering
+    setTimeout(() => {
+      printWindow.print();
+    }, 500);
   };
 
   //   if (isLoading) {
@@ -219,7 +228,7 @@ const Bills: React.FC = () => {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
                     <button
-                      onClick={() => handlePrint(bill._id)}
+                      onClick={() => handlePrint(bill)}
                       className="text-gray-500 hover:text-gray-800 p-1"
                     >
                       <PrintIcon className="w-5 h-5" />
@@ -264,7 +273,7 @@ const Bills: React.FC = () => {
                   </div>
                   <div className="flex items-center space-x-2">
                     <button
-                      onClick={() => handlePrint(bill._id)}
+                      onClick={() => handlePrint(bill)}
                       className="text-gray-500 hover:text-gray-800 p-1"
                     >
                       <PrintIcon className="w-5 h-5" />

@@ -52,7 +52,7 @@ const Dashboard: React.FC = () => {
   const chartData = React.useMemo(() => {
     const monthlyData: { [key: string]: number } = {};
     bills.forEach((bill) => {
-      const month = new Date(bill.date).toLocaleString("default", {
+      const month = new Date(bill.billDate).toLocaleString("default", {
         month: "short",
         year: "2-digit",
       });
