@@ -206,7 +206,7 @@ export const BillPdf = ({ bill }: { bill?: Bill }) => {
             text-align: left;
         }
         
-        th:nth-child(4), th:nth-child(5), th:nth-child(6), td:nth-child(4), td:nth-child(5), td:nth-child(6),td:nth-child(7) {
+        th:nth-child(4), th:nth-child(5), th:nth-child(6), td:nth-child(4), td:nth-child(5), td:nth-child(6),th:nth-child(7),td:nth-child(7) {
              text-align: right; /* Align numerical columns right */
         }
 
