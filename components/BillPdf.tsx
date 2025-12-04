@@ -42,7 +42,7 @@ const BillHtmlContent = ({ bill }: { bill?: Bill }) => {
             <th>S.No</th>
             <th>Item</th>
             <th>Wt (g)</th>
-            <th>Rate</th>
+            <th>Rate /10g</th>
             <th>Price</th>
             <th>Disc</th>
             <th>Final</th>
@@ -206,7 +206,7 @@ export const BillPdf = ({ bill }: { bill?: Bill }) => {
             text-align: left;
         }
         
-        th:nth-child(4), th:nth-child(5), th:nth-child(6), td:nth-child(4), td:nth-child(5), td:nth-child(6) {
+        th:nth-child(4), th:nth-child(5), th:nth-child(6), td:nth-child(4), td:nth-child(5), td:nth-child(6),td:nth-child(7) {
              text-align: right; /* Align numerical columns right */
         }
 
