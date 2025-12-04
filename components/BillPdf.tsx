@@ -43,7 +43,6 @@ const BillHtmlContent = ({ bill }: { bill?: Bill }) => {
             <th>Item</th>
             <th>Wt (g)</th>
             <th>Rate</th>
-            <th>Making</th>
             <th>Price</th>
             <th>Disc</th>
             <th>Final</th>
@@ -51,20 +50,18 @@ const BillHtmlContent = ({ bill }: { bill?: Bill }) => {
         </thead>
         <tbody>
           {bill.items.map((item, index) => {
-            const itemPrice =
-              (item.weightInGrams / 10) * item.ratePer10g + item.makingCharge;
+            const itemPrice = item.totalPrice;
             const finalPrice = itemPrice - (item.discount || 0);
             return (
               <tr key={index}>
                 <td>{index + 1}</td>
                 <td>{item.name}</td>
                 <td>{item.weightInGrams.toFixed(3)}</td>
-                <td>₹{item.ratePer10g.toLocaleString("en-IN")}</td>
-                <td>₹{item.makingCharge.toLocaleString("en-IN")}</td>
+                <td>₹{item.ratePer10g.toFixed()}</td>
                 <td>₹{itemPrice.toFixed(2)}</td>
-                <td>₹{(item.discount || 0).toLocaleString("en-IN")}</td>
+                <td>₹{(item.discount || 0).toFixed(2)}</td>
                 <td>
-                  <b>₹{finalPrice.toLocaleString("en-IN")}</b>
+                  <b>₹{finalPrice.toFixed(0.2)}</b>
                 </td>
               </tr>
             );
