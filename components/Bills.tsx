@@ -12,7 +12,7 @@ import {
 import { backendInstance } from "@/utils/constant";
 import { Bill } from "@/types";
 import Toast, { ToastType } from "./Toast";
-import { BillPdf } from "./billPdf";
+import { BillPdf } from "./BillPdf";
 
 const Bills: React.FC = () => {
   const navigate = useNavigate();
