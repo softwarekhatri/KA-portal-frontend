@@ -261,62 +261,66 @@ const Bills: React.FC = () => {
           </table>
           {/* Mobile View */}
           <div className="md:hidden space-y-4 p-4">
-            {bills.map((bill) => (
-              <div
-                key={bill._id}
-                className="bg-gray-50 p-4 rounded-lg shadow space-y-3"
-              >
-                <div className="flex justify-between items-start">
-                  <div>
-                    <p className="font-bold text-lg text-brand-dark">
-                      {bill.customer?.name}
-                    </p>
-                    <p className="text-sm font-mono text-gray-600">
-                      {bill._id}
-                    </p>
-                    <p className="text-sm text-gray-500">
-                      {new Date(bill.billDate).toLocaleDateString()}
-                    </p>
+            {loading ? (
+              <div className="text-center p-8">Fetching bills...</div>
+            ) : (
+              bills.map((bill) => (
+                <div
+                  key={bill._id}
+                  className="bg-gray-50 p-4 rounded-lg shadow space-y-3"
+                >
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <p className="font-bold text-lg text-brand-dark">
+                        {bill.customer?.name}
+                      </p>
+                      <p className="text-sm font-mono text-gray-600">
+                        {bill._id}
+                      </p>
+                      <p className="text-sm text-gray-500">
+                        {new Date(bill.billDate).toLocaleDateString()}
+                      </p>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <button
+                        onClick={() => handlePrint(bill)}
+                        className="text-gray-500 hover:text-gray-800 p-1"
+                      >
+                        <PrintIcon className="w-5 h-5" />
+                      </button>
+                      <button
+                        onClick={() =>
+                          navigate(`/bills/edit/${bill._id}`, { state: bill })
+                        }
+                        className="text-brand-gold hover:text-yellow-700 p-1"
+                      >
+                        <EditIcon className="w-5 h-5" />
+                      </button>
+                      <button
+                        onClick={() => handleDeleteBill(bill._id)}
+                        className="text-red-600 hover:text-red-900 p-1"
+                      >
+                        <TrashIcon className="w-5 h-5" />
+                      </button>
+                    </div>
                   </div>
-                  <div className="flex items-center space-x-2">
-                    <button
-                      onClick={() => handlePrint(bill)}
-                      className="text-gray-500 hover:text-gray-800 p-1"
-                    >
-                      <PrintIcon className="w-5 h-5" />
-                    </button>
-                    <button
-                      onClick={() =>
-                        navigate(`/bills/edit/${bill._id}`, { state: bill })
-                      }
-                      className="text-brand-gold hover:text-yellow-700 p-1"
-                    >
-                      <EditIcon className="w-5 h-5" />
-                    </button>
-                    <button
-                      onClick={() => handleDeleteBill(bill._id)}
-                      className="text-red-600 hover:text-red-900 p-1"
-                    >
-                      <TrashIcon className="w-5 h-5" />
-                    </button>
+                  <div className="flex justify-between text-sm border-t pt-2">
+                    <span className="text-gray-600">
+                      Total:{" "}
+                      <span className="font-medium text-brand-dark">
+                        ₹{bill.totalAmount.toLocaleString("en-IN")}
+                      </span>
+                    </span>
+                    <span className="text-gray-600">
+                      Due:{" "}
+                      <span className="font-medium text-red-600">
+                        ₹{bill.balanceDues.toLocaleString("en-IN")}
+                      </span>
+                    </span>
                   </div>
                 </div>
-                <div className="flex justify-between text-sm border-t pt-2">
-                  <span className="text-gray-600">
-                    Total:{" "}
-                    <span className="font-medium text-brand-dark">
-                      ₹{bill.totalAmount.toLocaleString("en-IN")}
-                    </span>
-                  </span>
-                  <span className="text-gray-600">
-                    Due:{" "}
-                    <span className="font-medium text-red-600">
-                      ₹{bill.balanceDues.toLocaleString("en-IN")}
-                    </span>
-                  </span>
-                </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
         </div>
         {!loading && bills.length === 0 && (
