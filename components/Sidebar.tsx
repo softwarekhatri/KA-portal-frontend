@@ -56,22 +56,16 @@ const Sidebar: React.FC<SidebarProps> = ({ sidebarOpen, setSidebarOpen }) => {
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
-        <div className="mb-10">
+        <div className="mb-5">
           <img
             src="/logo.png"
             alt="Khatri Alankar Logo"
             className="h-20 w-20 mx-auto mb-4 rounded-full object-cover "
           />
           <div className="flex items-center justify-between">
-            <h1 className="text-2xl font-bold text-brand-gold tracking-wider">
+            <h1 className="text-2xl font-bold text-brand-gold tracking-wider mx-auto">
               Khatri Alankar
             </h1>
-            <button
-              onClick={() => setSidebarOpen(false)}
-              className="md:hidden text-gray-400 hover:text-white"
-            >
-              <XIcon className="h-6 w-6" />
-            </button>
           </div>
         </div>
         <nav>
