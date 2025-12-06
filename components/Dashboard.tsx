@@ -1,5 +1,5 @@
-import React from "react";
-import { useData } from "../hooks/useData";
+import React, { useEffect, useState } from "react";
+import { backendInstance } from "@/utils/constant";
 import { CustomerIcon, BillIcon, RupeeIcon, AlertIcon } from "./icons/Icons";
 import {
   BarChart,
@@ -11,7 +11,6 @@ import {
   Legend,
   ResponsiveContainer,
 } from "recharts";
-import { calculateBillTotals } from "../utils/calculations";
 
 const StatCard: React.FC<{
   title: string;
@@ -29,43 +28,44 @@ const StatCard: React.FC<{
 );
 
 const Dashboard: React.FC = () => {
-  const { customers, bills, isLoading } = useData();
+  const [stats, setStats] = useState({
+    totalCustomers: 0,
+    totalBills: 0,
+    totalRevenue: "₹0",
+    unpaidDues: "₹0",
+  });
+  const [chartData, setChartData] = useState<
+    { name: string; revenue: number }[]
+  >([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const stats = React.useMemo(() => {
-    let totalRevenue = 0;
-    let unpaidDues = 0;
-
-    bills.forEach((bill) => {
-      const { totalPaid, balanceDue } = calculateBillTotals(bill);
-      totalRevenue += totalPaid;
-      unpaidDues += balanceDue;
-    });
-
-    return {
-      totalCustomers: customers.length,
-      totalBills: bills.length,
-      totalRevenue: `₹${totalRevenue.toLocaleString("en-IN")}`,
-      unpaidDues: `₹${unpaidDues.toLocaleString("en-IN")}`,
-    };
-  }, [customers, bills]);
-
-  const chartData = React.useMemo(() => {
-    const monthlyData: { [key: string]: number } = {};
-    bills.forEach((bill) => {
-      const month = new Date(bill.billDate).toLocaleString("default", {
-        month: "short",
-        year: "2-digit",
-      });
-      const { totalAmount } = calculateBillTotals(bill);
-      if (!monthlyData[month]) {
-        monthlyData[month] = 0;
-      }
-      monthlyData[month] += totalAmount;
-    });
-    return Object.entries(monthlyData)
-      .map(([name, revenue]) => ({ name, revenue }))
-      .slice(-6);
-  }, [bills]);
+  useEffect(() => {
+    setIsLoading(true);
+    backendInstance
+      .get("/bills/summary")
+      .then((response) => {
+        const data = response.data;
+        setStats({
+          totalCustomers: data.totalCustomers,
+          totalBills: data.totalBills,
+          totalRevenue: `₹${Number(data.totalPaidAmount).toLocaleString(
+            "en-IN"
+          )}`,
+          unpaidDues: `₹${Number(data.totalDues).toLocaleString("en-IN")}`,
+        });
+        setChartData(
+          (data.salesRevenue || []).map((item: any) => ({
+            name: new Date(item.date).toLocaleDateString("en-IN", {
+              month: "short",
+              day: "numeric",
+            }),
+            revenue: Number(item.dailyTotal),
+          }))
+        );
+      })
+      .catch(() => {})
+      .finally(() => setIsLoading(false));
+  }, []);
 
   if (isLoading) {
     return <div className="text-center p-8">Loading dashboard...</div>;
@@ -95,7 +95,7 @@ const Dashboard: React.FC = () => {
           color="bg-brand-gold"
         />
         <StatCard
-          title="Unpaid Dues"
+          title="Total Dues"
           value={stats.unpaidDues}
           icon={<AlertIcon className="h-6 w-6 text-white" />}
           color="bg-red-500"
@@ -104,13 +104,13 @@ const Dashboard: React.FC = () => {
 
       <div className="bg-white p-6 rounded-lg shadow-md">
         <h3 className="text-xl font-semibold mb-4 text-brand-dark">
-          Monthly Revenue (Last 6 Months)
+          Last 30 days Revenue
         </h3>
         <div style={{ width: "100%", height: 300 }}>
           <ResponsiveContainer>
             <BarChart
               data={chartData}
-              margin={{ top: 5, right: 20, left: -10, bottom: 5 }}
+              // margin={{ top: 5, right: 20, left: -10, bottom: 5 }}
             >
               <CartesianGrid strokeDasharray="3 3" vertical={false} />
               <XAxis dataKey="name" />
