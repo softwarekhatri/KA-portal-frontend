@@ -7,21 +7,23 @@ const BillHtmlContent = ({ bill }: { bill?: Bill }) => {
         <div className="mantra">ॐ नमः शिवाय</div>
         <div className="shop-name">KHATRI ALANKAR</div>
         <div className="shop-details">
-          Raja Bagicha, Rafiganj - 824125 | +91 9934799534 |
-          info@khatrialankar.com
+          RAJA BAGICHA, RAFIGANJ - 824125 | +91 9934799534
         </div>
       </div>
 
       <div className="bill-info">
-        <div>
+        <div className="customer-info">
           <p>
-            <strong>Name:</strong> {bill.customer.name}
+            <strong>Name:</strong> {bill.customer?.name || "—"}
           </p>
           <p>
-            <strong>Phone:</strong> {bill.customer.phone.join(", ")}
+            <strong>Phone:</strong>{" "}
+            {bill.customer?.phone?.length
+              ? bill.customer.phone.join(", ")
+              : "—"}
           </p>
           <p>
-            <strong>Address:</strong> {bill.customer.address}
+            <strong>Address:</strong> {bill.customer?.address || "—"}
           </p>
         </div>
         <div>
@@ -42,9 +44,9 @@ const BillHtmlContent = ({ bill }: { bill?: Bill }) => {
             <th>S.No</th>
             <th>Item</th>
             <th>Wt (g)</th>
-            <th>Rate /10g</th>
+            {/* <th>Rate /10g</th> */}
             <th>Price</th>
-            <th>Disc</th>
+            {/* <th>Disc</th> */}
             <th>Final</th>
           </tr>
         </thead>
@@ -57,11 +59,11 @@ const BillHtmlContent = ({ bill }: { bill?: Bill }) => {
                 <td>{index + 1}</td>
                 <td>{item.name}</td>
                 <td>{item.weightInGrams.toFixed(3)}</td>
-                <td>₹{item.ratePer10g.toFixed()}</td>
+                {/* <td>₹{item.ratePer10g.toFixed()}</td> */}
                 <td>₹{itemPrice.toFixed(2)}</td>
-                <td>₹{(item.discount || 0).toFixed(2)}</td>
+                {/* <td>₹{(item.discount || 0).toFixed(2)}</td> */}
                 <td>
-                  <b>₹{finalPrice.toFixed(0.2)}</b>
+                  <b>₹{finalPrice.toLocaleString("en-In")}</b>
                 </td>
               </tr>
             );
@@ -93,25 +95,22 @@ const BillHtmlContent = ({ bill }: { bill?: Bill }) => {
       <div className="summary">
         <div className="summary-item">
           <div className="summary-label">Total Price</div>
-          <div className="summary-value">₹{bill.totalAmount}</div>
+          <div className="summary-value">₹{bill.totalAmount.toFixed(2)}</div>
         </div>
         <div className="summary-item">
           <div className="summary-label">Paid</div>
-          <div className="summary-value text-success">
-            ₹{(bill.totalAmount - bill.balanceDues).toLocaleString("en-IN")}
+          <div className="summary-value">
+            ₹{(bill.totalAmount - bill.balanceDues).toFixed(2)}
           </div>
         </div>
         <div className="summary-item">
-          <div className="summary-label">Due</div>
-          <div className="summary-value text-danger">
-            ₹{bill.balanceDues.toLocaleString("en-IN")}
-          </div>
+          <div className="summary-label">Dues</div>
+          <div className="summary-value">₹{bill.balanceDues.toFixed(2)}</div>
         </div>
       </div>
 
       <div className="note">
-        *Goods once sold cannot be exchanged or returned. Prices are subject to
-        market rate changes.*
+        *Order on WhatsApp — Premium jewellery for all occasions.*
       </div>
     </div>
   );
@@ -173,8 +172,14 @@ export const BillPdf = ({ bill }: { bill?: Bill }) => {
 
         .shop-details {
             font-size: 9px; /* Smaller font for details */
-            color: #666;
+            // color: #666;
+            // color: #414141ff;
+            color: black;
             margin-top: 1px;
+        }
+
+        .customer-info{
+          // font-size: 12px;
         }
         
         /* --- INFO SECTIONS --- */
@@ -182,7 +187,7 @@ export const BillPdf = ({ bill }: { bill?: Bill }) => {
             display: flex;
             justify-content: space-between;
             margin: 5px 0 6px 0; /* Reduced vertical margin */
-            font-size: 10px; /* Smallest text for info */
+            font-size: 12px; /* Smallest text for info */
             line-height: 1.4;
             border-bottom: 1px dashed #ccc;
             padding-bottom: 4px;
@@ -196,12 +201,12 @@ export const BillPdf = ({ bill }: { bill?: Bill }) => {
         table {
             width: 100%;
             border-collapse: collapse;
-            font-size: 9.5px; /* Optimised font size for max data */
+            font-size: 12px; /* Optimised font size for max data */
             margin-bottom: 5px;
         }
 
         th, td {
-            border: 1px solid #ddd; /* Lighter border for readability */
+            border: 1px solid #414141ff; /* Lighter border for readability */
             padding: 3px 4px; /* Reduced padding */
             text-align: left;
         }
@@ -212,7 +217,7 @@ export const BillPdf = ({ bill }: { bill?: Bill }) => {
 
 
         th {
-            background: #f0f0f0;
+            // background: #f0f0f0;
             font-weight: bold;
             color: #333;
         }
@@ -231,9 +236,9 @@ export const BillPdf = ({ bill }: { bill?: Bill }) => {
             justify-content: space-between;
             margin-top: 4px;
             padding: 4px;
-            background: #e6e6e6; /* Lighter background */
+            // background: #e6e6e6; /* Lighter background */
             border-radius: 4px;
-            border: 1px solid #ccc;
+            border: 1px solid #414141ff;
         }
 
         .summary-item {
@@ -242,8 +247,9 @@ export const BillPdf = ({ bill }: { bill?: Bill }) => {
         }
 
         .summary-label {
-            font-size: 9px; /* Very small label */
-            color: #333;
+            font-size: 12px; /* Very small label */
+            // color: #333;
+            color:black;
         }
 
         .summary-value {
@@ -259,12 +265,20 @@ export const BillPdf = ({ bill }: { bill?: Bill }) => {
         }
         
         .note {
-            font-size: 9px;
+            font-size: 10px;
             margin-top: 5px;
-            color: #666;
+            // color: #666;
+            color: #414141ff;
             text-align: center;
             border-top: 1px dashed #ccc;
             padding-top: 2px;
+            font-weight: bold;
+        }
+        .text-success {
+            color: green;
+        }
+        .text-danger {
+            color: rgb(220 38 38);
         }
 `}
       </style>
