@@ -28,6 +28,7 @@ const Bills: React.FC = () => {
     message: string;
     type: ToastType;
   } | null>(null);
+  const [loading, setLoading] = useState(false);
 
   const handleDeleteBill = (billId: string) => {
     if (window.confirm("Are you sure you want to delete this bill?")) {
@@ -39,6 +40,7 @@ const Bills: React.FC = () => {
   };
 
   useEffect(() => {
+    setLoading(true);
     // Only call API if both startDate and endDate are selected, or neither is selected
     const bothDatesSelected = startDate && endDate;
     const neitherDateSelected = !startDate && !endDate;
@@ -67,7 +69,8 @@ const Bills: React.FC = () => {
       })
       .catch((error) => {
         console.error("Error fetching bills:", error);
-      });
+      })
+      .finally(() => setLoading(false));
   }, [debouncedSearchTerm, startDate, endDate, page, limit]);
 
   const handlePrint = (bill: Bill) => {
@@ -82,9 +85,9 @@ const Bills: React.FC = () => {
     }, 500);
   };
 
-  //   if (isLoading) {
-  // return <div className="text-center p-8">Loading bills...</div>;
-  //   }
+  // if (loading) {
+  //   return <div className="text-center p-8">Fetching bills...</div>;
+  // }
 
   return (
     <>
@@ -167,28 +170,32 @@ const Bills: React.FC = () => {
         <div className="bg-white shadow-md rounded-lg overflow-x-auto">
           {/* Desktop View */}
           <table className="min-w-full divide-y divide-gray-200 hidden md:table">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                  Bill ID
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                  Customer
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                  Date
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                  Bill
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                  Dues
-                </th>
-                <th className="relative px-6 py-3">
-                  <span className="sr-only">Actions</span>
-                </th>
-              </tr>
-            </thead>
+            {loading ? (
+              <div className="text-center p-8">Fetching bills...</div>
+            ) : (
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                    Bill ID
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                    Customer
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                    Date
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                    Bill
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                    Dues
+                  </th>
+                  <th className="relative px-6 py-3">
+                    <span className="sr-only">Actions</span>
+                  </th>
+                </tr>
+              </thead>
+            )}
             <tbody className="bg-white divide-y divide-gray-200">
               {bills.map((bill) => (
                 <tr key={bill._id}>
@@ -312,7 +319,7 @@ const Bills: React.FC = () => {
             ))}
           </div>
         </div>
-        {bills.length === 0 && (
+        {!loading && bills.length === 0 && (
           <p className="text-center text-gray-500 py-8">No bills found.</p>
         )}
         {/* Pagination Controls */}
