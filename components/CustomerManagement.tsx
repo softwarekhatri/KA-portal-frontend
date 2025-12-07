@@ -232,7 +232,7 @@ const CustomerManagement: React.FC = () => {
                       <span className="text-gray-600">
                         Dues:{" "}
                         <span className="font-medium text-red-600">
-                          {customer.totalDues}
+                          ₹ {customer.totalDues.toLocaleString("en-IN")}
                         </span>
                       </span>
                     </div>

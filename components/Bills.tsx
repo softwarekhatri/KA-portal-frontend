@@ -224,7 +224,7 @@ const Bills: React.FC = () => {
                     Date
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                    Bill
+                    Total
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                     Dues
@@ -351,7 +351,7 @@ const Bills: React.FC = () => {
                       </span>
                     </span>
                     <span className="text-gray-600">
-                      Due:{" "}
+                      Dues:{" "}
                       <span className="font-medium text-red-600">
                         ₹{bill.balanceDues.toLocaleString("en-IN")}
                       </span>
