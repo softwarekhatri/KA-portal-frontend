@@ -24,6 +24,14 @@ const CustomerManagement: React.FC = () => {
     type: ToastType;
   } | null>(null);
 
+  // Auto-dismiss toast after 1.5 seconds
+  useEffect(() => {
+    if (toast) {
+      const timer = setTimeout(() => setToast(null), 1500);
+      return () => clearTimeout(timer);
+    }
+  }, [toast]);
+
   const debouncedSearchTerm = useDebounce(searchTerm);
 
   useEffect(() => {
@@ -40,10 +48,14 @@ const CustomerManagement: React.FC = () => {
       .finally(() => setLoading(false));
   }, [page, limit, debouncedSearchTerm]);
 
-  const deleteCustomer = (customerId: string) => {
-    if (window.confirm("Are you sure you want to delete this customer?")) {
-      backendInstance.delete(`/customers/${customerId}`).then(() => {
-        setCustomerData((prev) => prev.filter((c) => c._id !== customerId));
+  const deleteCustomer = (customer: Customer) => {
+    const mesaage =
+      customer.totalDues && customer.totalDues > 0
+        ? "This customer has pending dues. Deleting will remove all associated data. Are you sure you want to proceed?"
+        : "Are you sure you want to delete this customer?";
+    if (window.confirm(mesaage)) {
+      backendInstance.delete(`/customers/${customer._id}`).then(() => {
+        setCustomerData((prev) => prev.filter((c) => c._id !== customer._id));
       });
       setToast({
         message: "Customer deleted successfully!",
@@ -165,7 +177,7 @@ const CustomerManagement: React.FC = () => {
                           <EditIcon className="w-5 h-5" />
                         </button>
                         <button
-                          onClick={() => deleteCustomer(customer._id!)}
+                          onClick={() => deleteCustomer(customer!)}
                           className="text-red-600 hover:text-red-900 p-1"
                         >
                           <TrashIcon className="w-5 h-5" />
@@ -203,7 +215,7 @@ const CustomerManagement: React.FC = () => {
                           <EditIcon className="w-5 h-5" />
                         </button>
                         <button
-                          onClick={() => deleteCustomer(customer._id!)}
+                          onClick={() => deleteCustomer(customer!)}
                           className="text-red-600 hover:text-red-900 p-1"
                         >
                           <TrashIcon className="w-5 h-5" />

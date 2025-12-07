@@ -26,6 +26,14 @@ const CustomerFormModal: React.FC<CustomerFormModalProps> = ({
     type: ToastType;
   } | null>(null);
 
+  // Auto-dismiss toast after 1.5 seconds
+  useEffect(() => {
+    if (toast) {
+      const timer = setTimeout(() => setToast(null), 1500);
+      return () => clearTimeout(timer);
+    }
+  }, [toast]);
+
   useEffect(() => {
     if (customer) {
       setName(customer.name);

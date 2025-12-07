@@ -28,6 +28,14 @@ const Bills: React.FC = () => {
     message: string;
     type: ToastType;
   } | null>(null);
+
+  // Auto-dismiss toast after 1.5 seconds
+  useEffect(() => {
+    if (toast) {
+      const timer = setTimeout(() => setToast(null), 1500);
+      return () => clearTimeout(timer);
+    }
+  }, [toast]);
   const [loading, setLoading] = useState(false);
 
   const handleDeleteBill = (billId: string) => {

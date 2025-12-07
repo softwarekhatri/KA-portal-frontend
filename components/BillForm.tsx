@@ -26,6 +26,14 @@ const BillForm: React.FC = () => {
     message: string;
     type: ToastType;
   } | null>(null);
+
+  // Auto-dismiss toast after 1.5 seconds
+  useEffect(() => {
+    if (toast) {
+      const timer = setTimeout(() => setToast(null), 1500);
+      return () => clearTimeout(timer);
+    }
+  }, [toast]);
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(
     null
   );
