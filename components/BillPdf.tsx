@@ -1,6 +1,15 @@
 import { Bill } from "@/types";
 
-const BillHtmlContent = ({ bill }: { bill?: Bill }) => {
+interface BillPdfColumnConfig {
+  showRatePer10g?: boolean;
+  showDiscount?: boolean;
+}
+
+const BillHtmlContent = ({
+  bill,
+  showRatePer10g = true,
+  showDiscount = true,
+}: { bill?: Bill } & BillPdfColumnConfig) => {
   return (
     <div className="bill-container">
       <div className="header">
@@ -44,9 +53,9 @@ const BillHtmlContent = ({ bill }: { bill?: Bill }) => {
             <th>S.No</th>
             <th>Item</th>
             <th>Wt (g)</th>
-            {/* <th>Rate /10g</th> */}
+            {showRatePer10g && <th>Rate /10g</th>}
             <th>Price</th>
-            {/* <th>Disc</th> */}
+            {showDiscount && <th>Disc</th>}
             <th>Final</th>
           </tr>
         </thead>
@@ -59,9 +68,9 @@ const BillHtmlContent = ({ bill }: { bill?: Bill }) => {
                 <td>{index + 1}</td>
                 <td>{item.name}</td>
                 <td>{item.weightInGrams.toFixed(3)}</td>
-                {/* <td>₹{item.ratePer10g.toFixed()}</td> */}
+                {showRatePer10g && <td>₹{item.ratePer10g.toFixed()}</td>}
                 <td>₹{itemPrice.toFixed(2)}</td>
-                {/* <td>₹{(item.discount || 0).toFixed(2)}</td> */}
+                {showDiscount && <td>₹{(item.discount || 0).toFixed(2)}</td>}
                 <td>
                   <b>₹{finalPrice.toLocaleString("en-In")}</b>
                 </td>
@@ -116,7 +125,11 @@ const BillHtmlContent = ({ bill }: { bill?: Bill }) => {
   );
 };
 
-export const BillPdf = ({ bill }: { bill?: Bill }) => {
+export const BillPdf = ({
+  bill,
+  showRatePer10g = true,
+  showDiscount = true,
+}: { bill?: Bill } & BillPdfColumnConfig) => {
   return (
     <div className="bg-white text-black">
       <style>
@@ -285,7 +298,11 @@ export const BillPdf = ({ bill }: { bill?: Bill }) => {
       <div id="print-area">
         <div className="flex flex-col">
           <div className="mb-2">
-            <BillHtmlContent bill={bill} />
+            <BillHtmlContent
+              bill={bill}
+              showRatePer10g={showRatePer10g}
+              showDiscount={showDiscount}
+            />
           </div>
         </div>
       </div>

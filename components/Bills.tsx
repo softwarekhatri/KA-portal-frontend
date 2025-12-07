@@ -15,6 +15,8 @@ import Toast, { ToastType } from "./Toast";
 import { BillPdf } from "./BillPdf";
 
 const Bills: React.FC = () => {
+  const [showRatePer10g, setShowRatePer10g] = useState(false);
+  const [showDiscount, setShowDiscount] = useState(false);
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const debouncedSearchTerm = useDebounce(searchTerm);
@@ -86,8 +88,13 @@ const Bills: React.FC = () => {
     const div = printWindow.document.createElement("div");
     printWindow.document.body.appendChild(div);
     const root = ReactDOM.createRoot(div);
-    root.render(<BillPdf bill={bill} />);
-    // Optional — auto print after rendering
+    root.render(
+      <BillPdf
+        bill={bill}
+        showRatePer10g={showRatePer10g}
+        showDiscount={showDiscount}
+      />
+    );
     setTimeout(() => {
       printWindow.print();
     }, 500);
@@ -108,6 +115,28 @@ const Bills: React.FC = () => {
       )}
 
       <div className="space-y-6">
+        {/* Print column selection */}
+        <div className="flex gap-4 items-center bg-yellow-50 border border-yellow-200 rounded p-2 mb-2">
+          <span className="font-semibold text-brand-dark">
+            Show columns in print:
+          </span>
+          <label className="flex items-center gap-1">
+            <input
+              type="checkbox"
+              checked={showRatePer10g}
+              onChange={(e) => setShowRatePer10g(e.target.checked)}
+            />
+            Rate per 10g
+          </label>
+          <label className="flex items-center gap-1">
+            <input
+              type="checkbox"
+              checked={showDiscount}
+              onChange={(e) => setShowDiscount(e.target.checked)}
+            />
+            Discount
+          </label>
+        </div>
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <h2 className="text-3xl font-bold text-brand-dark">Bills</h2>
           <button
