@@ -138,7 +138,9 @@ const Bills: React.FC = () => {
           </label>
         </div>
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <h2 className="text-3xl font-bold text-brand-dark">Bills</h2>
+          <h2 className="text-3xl font-bold text-brand-dark">
+            Bills Management
+          </h2>
           <button
             onClick={() => navigate("/bills/new")}
             className="flex items-center justify-center bg-brand-gold text-brand-dark font-semibold px-4 py-2 rounded-md hover:opacity-90 transition-opacity"
